@@ -1,9 +1,10 @@
 ﻿using OutSystems.ExternalLibraries.SDK;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace MongoDB_ODC
 {
-    [OSInterface(Name = "MongoDB")]
+    [OSInterface(Description = "MongoDB Connection", Name = "MongoDB")]
     public interface IMongoDB
     {
         bool ValidateConnection(string connectionString, string databaseName);

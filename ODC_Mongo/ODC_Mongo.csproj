@@ -11,4 +11,27 @@
     <PackageReference Include="OutSystems.ExternalLibraries.SDK" Version="1.4.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="resources %28copy%29\mongodb.ico" />
+    <None Remove="resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\mongodb.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
