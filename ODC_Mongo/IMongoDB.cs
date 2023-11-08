@@ -4,7 +4,8 @@ using System.Xml.Linq;
 
 namespace MongoDB_ODC
 {
-    [OSInterface(Description = "MongoDB Connection", Name = "MongoDB")]
+    [OSInterface(Description = "MongoDB Connection", IconResourceName = "ODC_Mongo.resources.mongodb.ico")]
+    //[OSInterface(Description = "MongoDB Connection", Name = "MongoDB")]
     public interface IMongoDB
     {
         bool ValidateConnection(string connectionString, string databaseName);

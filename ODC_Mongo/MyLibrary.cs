@@ -48,7 +48,8 @@ namespace MongoDB_ODC
             var bsonList = collection.Find(new BsonDocument()).Skip(skip).Limit(limit).ToList();
 
             var jsonArray = new BsonArray(bsonList);
-            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+            //var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson};
             var json = jsonArray.ToJson(jsonWriterSettings);
 
             return json;
