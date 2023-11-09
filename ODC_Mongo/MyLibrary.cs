@@ -12,14 +12,16 @@ namespace MongoDB_ODC
 {
     public class MyLibrary : IMongoDB
     {
+        private MongoDBHandler _handler;
+
         public MyLibrary()
         {
-            // Construtor público sem parâmetros
+        
         }
 
-        public MyLibrary(int value)
+        public void Initialize(string connectionString, string databaseName)
         {
-            // Construtor com um parâmetro, se necessário
+            _handler = new MongoDBHandler(connectionString, databaseName);
         }
 
         [OSAction]
@@ -77,6 +79,36 @@ namespace MongoDB_ODC
             var jsonResult = aggregateResult.ToJson(jsonWriterSettings);
 
             return jsonResult;
+        }
+
+        [OSAction(Description = "Creates a document in the specified collection.")]
+        public void CreateDocument(string collectionName, string documentJson)
+        {
+            if (_handler == null)
+            {
+                throw new InvalidOperationException("Handler not initialized.");
+            }
+            _handler.CreateDocument(collectionName, documentJson);
+        }
+
+        [OSAction(Description = "Retrieves documents from the specified collection as JSON.")]
+        public string GetDocuments(string collectionName, string filterJson)
+        {
+            var bsonDocuments = _handler.GetDocuments(collectionName, filterJson);
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
+            return bsonDocuments.ToJson(jsonWriterSettings);
+        }
+
+        [OSAction(Description = "Update documents from the specified collection.")]
+        public void UpdateDocument(string collectionName, string filterJson, string updateJson)
+        {
+            _handler.UpdateDocument(collectionName, filterJson, updateJson);
+        }
+
+        [OSAction(Description = "Delete documents from the specified collection.")]
+        public void DeleteDocument(string collectionName, string filterJson)
+        {
+            _handler.DeleteDocument(collectionName, filterJson);
         }
     }
 }

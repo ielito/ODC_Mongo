@@ -53,5 +53,8 @@ namespace MongoDB_ODC
             var collection = GetCollection(collectionName);
             return collection.Aggregate<BsonDocument>((PipelineDefinition<BsonDocument, BsonDocument>)pipeline).ToList();
         }
+
+
+        
     }
 }
