@@ -1,6 +1,8 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
+
 
 namespace MongoDB_ODC
 {
@@ -44,6 +46,12 @@ namespace MongoDB_ODC
         {
             var collection = GetCollection(collectionName);
             return collection.CountDocuments(new BsonDocument());
+        }
+
+        public List<BsonDocument> AggregateCollection(string collectionName, IEnumerable<BsonDocument> pipeline)
+        {
+            var collection = GetCollection(collectionName);
+            return collection.Aggregate<BsonDocument>((PipelineDefinition<BsonDocument, BsonDocument>)pipeline).ToList();
         }
     }
 }

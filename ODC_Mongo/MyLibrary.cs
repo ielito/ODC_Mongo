@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
 
 namespace MongoDB_ODC
 {
@@ -53,6 +54,29 @@ namespace MongoDB_ODC
             var json = jsonArray.ToJson(jsonWriterSettings);
 
             return json;
+        }
+
+        [OSAction(Description = "Performs an aggregation operation on a collection and returns the results in JSON format.")]
+        public string AggregateCollection(string collectionName, string connectionString, string databaseName, string aggregatePipeline)
+        {
+            var mongoService = new MongoService(connectionString, databaseName);
+
+            if (!mongoService.CollectionExists(collectionName))
+            {
+                throw new ApplicationException($"A coleção '{collectionName}' não existe no banco de dados '{databaseName}'.");
+            }
+
+            // Parse the aggregation pipeline JSON into a BsonDocument array
+            var bsonPipeline = BsonSerializer.Deserialize<BsonDocument[]>(aggregatePipeline);
+
+            // Execute the aggregation pipeline
+            var aggregateResult = mongoService.AggregateCollection(collectionName, bsonPipeline);
+
+            // Convert the result to JSON
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
+            var jsonResult = aggregateResult.ToJson(jsonWriterSettings);
+
+            return jsonResult;
         }
     }
 }
