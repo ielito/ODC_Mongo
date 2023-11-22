@@ -13,9 +13,14 @@ public class MongoDBHandler
 
     public void CreateDocument(string collectionName, string documentJson)
     {
+        Console.WriteLine($"Creating document in collection: {collectionName}");
+        Console.WriteLine($"Document JSON: {documentJson}");
+
         var collection = database.GetCollection<BsonDocument>(collectionName);
         var document = BsonDocument.Parse(documentJson);
         collection.InsertOne(document);
+
+        Console.WriteLine("Document created successfully.");
     }
 
     public List<BsonDocument> GetDocuments(string collectionName, string filterJson)

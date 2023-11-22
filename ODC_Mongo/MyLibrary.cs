@@ -7,12 +7,15 @@ using System;
 using System.Collections.Generic;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
+using MongoDB.Driver.Core.Configuration;
 
 namespace MongoDB_ODC
 {
     public class MyLibrary : IMongoDB
     {
         private MongoDBHandler _handler;
+        private string _connectionString;
+        private string _databaseName;
 
         public MyLibrary()
         {
@@ -21,6 +24,8 @@ namespace MongoDB_ODC
 
         public void Initialize(string connectionString, string databaseName)
         {
+            _connectionString = connectionString;
+            _databaseName = databaseName;
             _handler = new MongoDBHandler(connectionString, databaseName);
         }
 
@@ -82,32 +87,32 @@ namespace MongoDB_ODC
         }
 
         [OSAction(Description = "Creates a document in the specified collection.")]
-        public void CreateDocument(string collectionName, string documentJson)
+        public void CreateDocument(string connectionString, string databaseName, string collectionName, string documentJson)
         {
-            if (_handler == null)
-            {
-                throw new InvalidOperationException("Handler not initialized.");
-            }
+            _handler = new MongoDBHandler(connectionString, databaseName);
             _handler.CreateDocument(collectionName, documentJson);
         }
 
         [OSAction(Description = "Retrieves documents from the specified collection as JSON.")]
-        public string GetDocuments(string collectionName, string filterJson)
+        public string GetDocuments(string connectionString, string databaseName, string collectionName, string filterJson)
         {
+            _handler = new MongoDBHandler(connectionString, databaseName);
             var bsonDocuments = _handler.GetDocuments(collectionName, filterJson);
             var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
             return bsonDocuments.ToJson(jsonWriterSettings);
         }
 
         [OSAction(Description = "Update documents from the specified collection.")]
-        public void UpdateDocument(string collectionName, string filterJson, string updateJson)
+        public void UpdateDocument(string collectionName, string filterJson, string updateJson, string databaseName, string connectionString )
         {
+            _handler = new MongoDBHandler(connectionString, databaseName);
             _handler.UpdateDocument(collectionName, filterJson, updateJson);
         }
 
         [OSAction(Description = "Delete documents from the specified collection.")]
-        public void DeleteDocument(string collectionName, string filterJson)
+        public void DeleteDocument(string collectionName, string filterJson, string connectionString, string databaseName)
         {
+            _handler = new MongoDBHandler(connectionString, databaseName);
             _handler.DeleteDocument(collectionName, filterJson);
         }
     }
