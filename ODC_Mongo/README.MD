@@ -1,33 +1,50 @@
 ﻿# MongoDB Integration Module for OutSystems
 
-This module provides an integration between OutSystems and MongoDB, allowing developers to retrieve data from a MongoDB database and display it within an OutSystems application.
+This module provides an integration between OutSystems and MongoDB, enabling developers to perform CRUD (Create, Read, Update, Delete) operations from within an OutSystems application. It simplifies the interaction with MongoDB databases by providing a ready-to-use interface and server actions.
 
-## Configuration
+## Features
 
-1. **Connection Settings**:
-   - Update the `ConnectionString` and `DatabaseName` input parameters in the `GetCollectionDocuments` action to match your MongoDB setup.
+- **Seamless Integration**: Leverage the power of MongoDB directly within your OutSystems applications.
+- **CRUD Operations**: Full set of operations to manage your MongoDB data with ease.
+- **Flexible Configuration**: Set up connection strings and database configurations without writing any code.
 
-2. **Collection Name**:
-   - Specify the `CollectionName` input parameter in the `GetCollectionDocuments` action to target the desired MongoDB collection.
+## Getting Started
 
-3. **Handling Data**:
-   - Data retrieved from MongoDB will be formatted as JSON. Utilize OutSystems built-in JSON serialization and deserialization actions to work with the data.
+To begin using this module, clone the repository into your development environment, configure your database connection, and you're ready to start manipulating your MongoDB data through OutSystems.
+
+### Prerequisites
+
+- Access to an OutSystems environment.
+- MongoDB server with proper credentials.
+
+### Installation
+
+To use in OutSystems: please look for this component on Forge.
+To edit: Clone the GitHub repository to your local machine or directly into your OutSystems environment. Configure your MongoDB `connectionString` and `databaseName` through the Service Center or environment variables.
+
+### Configuration
+
+Set the `connectionString` and `databaseName` in the module settings to point to your MongoDB instance. This will be used across all server actions to establish a connection to the database.
 
 ## Usage
 
-- Call the `GetCollectionDocuments` action from your OutSystems application to retrieve data from the specified MongoDB collection.
-- Utilize the provided JSON to construct and display data in your application, or to further process and store it within OutSystems entities.
+The module comes with pre-built screens that correspond to each CRUD operation:
 
-## Feedback
+- **Create**: Add new documents to your database using the intuitive web forms.
+- **Read**: Search and retrieve documents with custom filters.
+- **Update**: Apply changes to existing documents in your database.
+- **Delete**: Remove documents from your collections as needed.
 
-We appreciate your feedback! If you have suggestions or issues, please use the feedback option within the module to let us know.
+## Documentation
 
-## Future Improvements
-
-- Enhanced data formatting options.
-- Improved error handling.
-- Additional actions for inserting and updating data in MongoDB.
+For detailed instructions on setting up and using this module, please refer to the [Documentation](/docs) folder.
 
 ## License
 
-This module is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+
+## Acknowledgments
+
+- Hat tip to anyone whose code was used as inspiration.
+- The OutSystems community for their continuous support.
+- MongoDB team for providing an excellent NoSQL platform.
