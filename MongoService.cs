@@ -16,11 +16,11 @@ namespace MongoDB_ODC
             _database = client.GetDatabase(databaseName);
         }
 
-        public bool ValidateConnection()
+        public async Task<bool> ValidateConnectionAsync()
         {
             try
             {
-                _database.RunCommandAsync((Command<BsonDocument>)"{ping:1}").Wait();
+                await _database.RunCommandAsync((Command<BsonDocument>)"{ping:1}");
                 return true;
             }
             catch (Exception ex)
@@ -48,38 +48,70 @@ namespace MongoDB_ODC
             return collection.CountDocuments(new BsonDocument());
         }
 
+        public async Task<List<BsonDocument>> GetCollectionDocumentsAsync(string collectionName, int skip, int limit)
+        {
+            var collection = GetCollection(collectionName);
+            return await collection.Find(new BsonDocument()).Skip(skip).Limit(limit).ToListAsync();
+        }
+
         //public List<BsonDocument> AggregateCollection(string collectionName, IEnumerable<BsonDocument> pipeline)
         //{
         //    var collection = GetCollection(collectionName);
         //    return collection.Aggregate<BsonDocument>((PipelineDefinition<BsonDocument, BsonDocument>)pipeline).ToList();
         //}
 
-        public List<BsonDocument> AggregateCollection(string collectionName, IEnumerable<BsonDocument> pipelineDocuments)
+        public async Task<List<BsonDocument>> AggregateCollectionAsync(string collectionName, IEnumerable<BsonDocument> pipelineDocuments)
         {
             var collection = _database.GetCollection<BsonDocument>(collectionName);
 
             try
             {
-                // Iniciando o Aggregate Fluent
                 var fluent = collection.Aggregate();
 
-                // Aplicando cada estágio do pipeline
                 foreach (var stage in pipelineDocuments)
                 {
                     fluent = fluent.AppendStage<BsonDocument>(stage);
                 }
 
-                // Executando a agregação
-                var results = fluent.ToList();
+                var results = await fluent.ToListAsync();
 
-                Console.WriteLine($"Documentos agregados fluentemente: {results.Count}");
+                Console.WriteLine($"Documents aggregated fluently: {results.Count}");
                 return results;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro durante a agregação fluent: {ex.Message}");
-                return new List<BsonDocument>(); // Retorna lista vazia ou gerencia o erro conforme necessário
+                Console.WriteLine($"Error during fluent aggregation: {ex.Message}");
+                return new List<BsonDocument>();
             }
         }
-}
+
+        public async Task CreateDocumentAsync(string collectionName, string documentJson)
+        {
+            var collection = GetCollection(collectionName);
+            var document = BsonDocument.Parse(documentJson);
+            await collection.InsertOneAsync(document);
+        }
+
+        public async Task<List<BsonDocument>> GetDocumentsAsync(string collectionName, string filterJson)
+        {
+            var collection = GetCollection(collectionName);
+            var filter = BsonDocument.Parse(filterJson);
+            return await collection.Find(filter).ToListAsync();
+        }
+
+        public async Task UpdateDocumentAsync(string collectionName, string filterJson, string updateJson)
+        {
+            var collection = GetCollection(collectionName);
+            var filter = BsonDocument.Parse(filterJson);
+            var update = BsonDocument.Parse(updateJson);
+            await collection.UpdateOneAsync(filter, update);
+        }
+
+        public async Task DeleteDocumentAsync(string collectionName, string filterJson)
+        {
+            var collection = GetCollection(collectionName);
+            var filter = BsonDocument.Parse(filterJson);
+            await collection.DeleteOneAsync(filter);
+        }
+    }
 }

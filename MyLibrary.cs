@@ -13,9 +13,7 @@ namespace MongoDB_ODC
 {
     public class MyLibrary : IMongoDB
     {
-        private MongoDBHandler _handler;
-        private string _connectionString;
-        private string _databaseName;
+        private MongoService _mongoService;
 
         public MyLibrary()
         {
@@ -24,63 +22,47 @@ namespace MongoDB_ODC
 
         public void Initialize(string connectionString, string databaseName)
         {
-            _connectionString = connectionString;
-            _databaseName = databaseName;
-            _handler = new MongoDBHandler(connectionString, databaseName);
+            _mongoService = new MongoService(connectionString, databaseName);
         }
 
         [OSAction]
-        public bool ValidateConnection(string connectionString, string databaseName)
+        public async Task<bool> ValidateConnectionAsync()
         {
-            var mongoService = new MongoService(connectionString, databaseName);
-            return mongoService.ValidateConnection();
+            return await _mongoService.ValidateConnectionAsync();
         }
 
         [OSAction]
-        public string GetCollectionDocuments(string collectionName, string connectionString, string databaseName, int skip, int limit)
+        public async Task<string> GetCollectionDocumentsAsync(string collectionName, int skip, int limit)
         {
-            var mongoService = new MongoService(connectionString, databaseName);
-
-            if (!mongoService.CollectionExists(collectionName))
+            if (!_mongoService.CollectionExists(collectionName))
             {
-                throw new ApplicationException($"A coleção '{collectionName}' não existe no banco de dados '{databaseName}'.");
+                throw new ApplicationException($"The collection '{collectionName}' does not exist in the database.");
             }
 
-            var documentCount = mongoService.GetDocumentCount(collectionName);
+            var documentCount = _mongoService.GetDocumentCount(collectionName);
             if (documentCount == 0)
             {
-                throw new ApplicationException($"A coleção '{collectionName}' está vazia.");
+                throw new ApplicationException($"The collection '{collectionName}' is empty.");
             }
 
-            var collection = mongoService.GetCollection(collectionName);
-            var bsonList = collection.Find(new BsonDocument()).Skip(skip).Limit(limit).ToList();
-
+            var bsonList = await _mongoService.GetCollectionDocumentsAsync(collectionName, skip, limit);
             var jsonArray = new BsonArray(bsonList);
-            //var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson};
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
             var json = jsonArray.ToJson(jsonWriterSettings);
 
             return json;
         }
 
         [OSAction(Description = "Performs an aggregation operation on a collection and returns the results in JSON format.")]
-        public string AggregateCollection(string collectionName, string connectionString, string databaseName, string aggregatePipeline)
+        public async Task<string> AggregateCollectionAsync(string collectionName, string aggregatePipeline)
         {
-            var mongoService = new MongoService(connectionString, databaseName);
-            Console.WriteLine($"Verificando se a coleção existe: {collectionName}");
-
-            if (!mongoService.CollectionExists(collectionName))
+            if (!_mongoService.CollectionExists(collectionName))
             {
-                throw new ApplicationException($"A coleção '{collectionName}' não existe no banco de dados '{databaseName}'.");
+                throw new ApplicationException($"The collection '{collectionName}' does not exist in the database.");
             }
 
-            // Parse the aggregation pipeline JSON into a BsonDocument array
             var bsonPipeline = BsonSerializer.Deserialize<BsonDocument[]>(aggregatePipeline);
-
-            // Execute the aggregation pipeline
-            var aggregateResult = mongoService.AggregateCollection(collectionName, bsonPipeline);
-
-            // Convert the result to JSON
+            var aggregateResult = await _mongoService.AggregateCollectionAsync(collectionName, bsonPipeline);
             var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
             var jsonResult = aggregateResult.ToJson(jsonWriterSettings);
 
@@ -88,33 +70,29 @@ namespace MongoDB_ODC
         }
 
         [OSAction(Description = "Creates a document in the specified collection.")]
-        public void CreateDocument(string connectionString, string databaseName, string collectionName, string documentJson)
+        public async Task CreateDocumentAsync(string collectionName, string documentJson)
         {
-            _handler = new MongoDBHandler(connectionString, databaseName);
-            _handler.CreateDocument(collectionName, documentJson);
+            await _mongoService.CreateDocumentAsync(collectionName, documentJson);
         }
 
         [OSAction(Description = "Retrieves documents from the specified collection as JSON.")]
-        public string GetDocuments(string connectionString, string databaseName, string collectionName, string filterJson)
+        public async Task<string> GetDocumentsAsync(string collectionName, string filterJson)
         {
-            _handler = new MongoDBHandler(connectionString, databaseName);
-            var bsonDocuments = _handler.GetDocuments(collectionName, filterJson);
+            var bsonDocuments = await _mongoService.GetDocumentsAsync(collectionName, filterJson);
             var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.CanonicalExtendedJson };
             return bsonDocuments.ToJson(jsonWriterSettings);
         }
 
         [OSAction(Description = "Update documents from the specified collection.")]
-        public void UpdateDocument(string collectionName, string filterJson, string updateJson, string databaseName, string connectionString )
+        public async Task UpdateDocumentAsync(string collectionName, string filterJson, string updateJson)
         {
-            _handler = new MongoDBHandler(connectionString, databaseName);
-            _handler.UpdateDocument(collectionName, filterJson, updateJson);
+            await _mongoService.UpdateDocumentAsync(collectionName, filterJson, updateJson);
         }
 
         [OSAction(Description = "Delete documents from the specified collection.")]
-        public void DeleteDocument(string collectionName, string filterJson, string connectionString, string databaseName)
+        public async Task DeleteDocumentAsync(string collectionName, string filterJson)
         {
-            _handler = new MongoDBHandler(connectionString, databaseName);
-            _handler.DeleteDocument(collectionName, filterJson);
+            await _mongoService.DeleteDocumentAsync(collectionName, filterJson);
         }
     }
 }
